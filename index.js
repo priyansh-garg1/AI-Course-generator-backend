@@ -17,7 +17,7 @@ app.use(helmet());
 
 app.use(cors({
   origin: '*',
-  credentials: true
+  credentials: true,
 }));
 
 if (process.env.NODE_ENV === 'development') {
