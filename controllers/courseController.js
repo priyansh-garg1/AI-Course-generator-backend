@@ -119,7 +119,6 @@ export const getCourseById = async (req, res) => {
   try {
     const course = await Course.findOne({
       _id: req.params.id,
-      createdBy: req.user.id
     }).populate('createdBy', 'name email');
 
     if (!course) {
