@@ -62,3 +62,45 @@ Please generate a comprehensive course layout based on the user input. Make sure
     throw new Error(`Failed to generate course layout: ${error.message}`);
   }
 }; 
+
+export const generateFullCourseContent = async (courseLayout) => {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    // Compose the prompt for full course content generation
+    const prompt = `Depends on Chapter name and Topic Generate content for each topic in HTML and give response in JSON format.
+
+Schema:
+[
+  {
+    chapterName: <>,
+    topics: [
+      {
+        topic: <>,
+        content: <HTML content>
+      }
+    ]
+  }
+]
+
+User Input:
+${JSON.stringify(courseLayout, null, 2)}
+`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    // Extract JSON from the response
+    const jsonMatch = text.match(/\[([\s\S]*)\]/);
+    if (!jsonMatch) {
+      throw new Error('No valid JSON array found in AI response');
+    }
+
+    const chaptersContent = JSON.parse(`[${jsonMatch[1]}]`);
+    return chaptersContent;
+  } catch (error) {
+    console.error('Error generating full course content:', error);
+    throw new Error(`Failed to generate full course content: ${error.message}`);
+  }
+}; 

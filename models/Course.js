@@ -18,6 +18,9 @@ const chapterSchema = new mongoose.Schema({
   order: {
     type: Number,
     required: true
+  },
+  content: {
+    type: String
   }
 });
 

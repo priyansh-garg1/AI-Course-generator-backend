@@ -8,13 +8,14 @@ import {
   deleteCourse,
   updateCourseStatus
 } from '../controllers/courseController.js';
-import { generateCourse } from '../controllers/courseGenerationController.js';
+import { generateCourse, generateAndSaveFullCourse } from '../controllers/courseGenerationController.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
 router.get('/explore', getAllCourses);
 router.post('/generate', generateCourse);
+router.post('/generate-full', protect, generateAndSaveFullCourse);
 
 router.use(protect);
 
