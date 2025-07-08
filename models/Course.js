@@ -21,6 +21,9 @@ const chapterSchema = new mongoose.Schema({
   },
   content: {
     type: String
+  },
+  youtubeVideo: {
+    type: String
   }
 });
 

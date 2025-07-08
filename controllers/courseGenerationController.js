@@ -1,5 +1,6 @@
 import { generateCourseLayout } from '../services/geminiService.js';
 import { generateFullCourseContent } from '../services/geminiService.js';
+import { fetchYouTubeVideos } from '../services/geminiService.js';
 import Course from '../models/Course.js';
 
 export const generateCourse = async (req, res) => {
@@ -75,22 +76,26 @@ export const generateAndSaveFullCourse = async (req, res) => {
       status: 'published',
     };
 
-    // Map chaptersContent to generatedChapters
+    // Map chaptersContent to generatedChapters, fetch YouTube video for each topic
     if (Array.isArray(chaptersContent)) {
-      chaptersContent.forEach((chapter, idx) => {
+      for (const [idx, chapter] of chaptersContent.entries()) {
         if (chapter.topics && Array.isArray(chapter.topics)) {
-          chapter.topics.forEach((topicObj, tIdx) => {
+          for (const topicObj of chapter.topics) {
+            // Search YouTube for chapter name + topic
+            const searchQuery = `${chapter.chapterName} ${topicObj.topic}`;
+            const videoLinks = await fetchYouTubeVideos(searchQuery, 1);
             courseData.generatedChapters.push({
               title: chapter.chapterName,
               description: topicObj.topic,
               objectives: [],
               videoKeywords: '',
               order: idx + 1,
-              content: topicObj.content
+              content: topicObj.content,
+              youtubeVideo: videoLinks[0] || ''
             });
-          });
+          }
         }
-      });
+      }
     }
 
     // Save the course

@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import axios from 'axios';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -67,21 +68,22 @@ export const generateFullCourseContent = async (courseLayout) => {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // Compose the prompt for full course content generation
-    const prompt = `Depends on Chapter name and Topic Generate content for each topic in HTML and give response in JSON format.
+    const prompt = `Generate detailed HTML-based educational content for each topic under every chapter from the provided course layout.
 
-Schema:
+Return response in valid JSON format only:
 [
   {
-    chapterName: <>,
-    topics: [
+    "chapterName": "string",
+    "topics": [
       {
-        topic: <>,
-        content: <HTML content>
+        "topic": "string",
+        "content": "<HTML content>"
       }
     ]
   }
 ]
+
+Respond ONLY with a clean JSON array. Do not include markdown or extra text.
 
 User Input:
 ${JSON.stringify(courseLayout, null, 2)}
@@ -89,18 +91,45 @@ ${JSON.stringify(courseLayout, null, 2)}
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    const text = await response.text(); // ✅ FIXED
 
-    // Extract JSON from the response
     const jsonMatch = text.match(/\[([\s\S]*)\]/);
     if (!jsonMatch) {
       throw new Error('No valid JSON array found in AI response');
     }
 
-    const chaptersContent = JSON.parse(`[${jsonMatch[1]}]`);
+    const cleaned = `[${jsonMatch[1].replace(/[\x00-\x1F\x7F]/g, '')}]`;
+
+    const chaptersContent = JSON.parse(cleaned);
     return chaptersContent;
   } catch (error) {
     console.error('Error generating full course content:', error);
     throw new Error(`Failed to generate full course content: ${error.message}`);
+  }
+};
+
+
+export const fetchYouTubeVideos = async (query, maxResults = 1) => {
+  try {
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    if (!apiKey) throw new Error('YouTube API key not configured');
+    const url = `https://www.googleapis.com/youtube/v3/search`;
+    const params = {
+      part: 'snippet',
+      q: query,
+      type: 'video',
+      maxResults,
+      key: apiKey,
+      safeSearch: 'strict',
+      videoEmbeddable: 'true',
+    };
+    const response = await axios.get(url, { params });
+    if (response.data && response.data.items && response.data.items.length > 0) {
+      return response.data.items.map(item => `https://www.youtube.com/watch?v=${item.id.videoId}`);
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching YouTube videos:', error);
+    return [];
   }
 }; 
