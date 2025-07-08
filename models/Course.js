@@ -51,7 +51,17 @@ const courseSchema = new mongoose.Schema({
     required: true,
     enum: ['Beginner', 'Intermediate', 'Advanced']
   },
+  level: {
+    type: String,
+    enum: ['Beginner', 'Intermediate', 'Advanced']
+  },
+  bannerImagePrompt: {
+    type: String
+  },
   generatedChapters: [chapterSchema],
+  aiGeneratedLayout: {
+    type: Object
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
