@@ -66,16 +66,35 @@ export const getUserEnrollments = async (req, res) => {
     }
 
     const enrollments = await Enrollment.find(filter)
-      .populate('courseId', 'name description category difficulty chapters status')
+      .populate('courseId')
       .sort({ lastAccessedAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
+
+    // Calculate progress for each enrollment
+    const enrollmentsWithProgress = await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const course = await Course.findById(enrollment.courseId._id);
+        const totalTopics = course?.generatedChapters?.length || 0;
+        const completedTopics = enrollment.progress.completedTopics.length;
+        const completionPercentage = totalTopics > 0 ? Math.min(Math.round((completedTopics / totalTopics) * 100), 100) : 0;
+
+        return {
+          ...enrollment.toObject(),
+          progress: {
+            ...enrollment.progress,
+            totalTopics,
+            completionPercentage
+          }
+        };
+      })
+    );
 
     const total = await Enrollment.countDocuments(filter);
 
     res.json({
       success: true,
-      data: enrollments,
+      data: enrollmentsWithProgress,
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / limit),
@@ -121,7 +140,7 @@ export const getEnrollmentDetails = async (req, res) => {
     // Calculate total topics and completion percentage
     const totalTopics = course.generatedChapters?.length || 0;
     const completedTopics = enrollment.progress.completedTopics.length;
-    const completionPercentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+    const completionPercentage = totalTopics > 0 ? Math.min(Math.round((completedTopics / totalTopics) * 100), 100) : 0;
 
     res.json({
       success: true,
