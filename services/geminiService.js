@@ -70,7 +70,20 @@ export const generateFullCourseContent = async (courseLayout) => {
 
     const prompt = `Generate detailed HTML-based educational content for each topic under every chapter from the provided course layout.
 
-Return response in valid JSON format only:
+For each topic, the HTML content must include:
+- Explanations and key concepts
+- At least one real-world example
+- Bullet points or numbered lists where appropriate
+- At least one thought-provoking question or exercise for the learner
+
+Output requirements:
+- Return your response as a valid JSON array only (no markdown, no code blocks, no extra text)
+- The output MUST be directly parsable by JSON.parse() in JavaScript, with no leading or trailing characters
+- All HTML content must be properly escaped for JSON (e.g., double quotes inside HTML must be escaped as \" )
+- Do NOT include any explanations, comments, or formatting outside the JSON array
+- If you do not follow these instructions, your response will be rejected
+
+JSON Format Example:
 [
   {
     "chapterName": "string",
@@ -83,11 +96,10 @@ Return response in valid JSON format only:
   }
 ]
 
-Respond ONLY with a clean JSON array. Do not include markdown or extra text.
-
 User Input:
 ${JSON.stringify(courseLayout, null, 2)}
-`;
+
+REMEMBER: Respond ONLY with a clean JSON array, no markdown, no extra text, no comments, and no code block markers. If you do not follow these instructions, your response will be rejected.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
