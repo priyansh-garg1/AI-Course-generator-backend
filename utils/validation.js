@@ -24,8 +24,8 @@ export const validateCourseData = (data, isUpdate = false) => {
   if (!isUpdate || data.chapters !== undefined) {
     if (!data.chapters || isNaN(data.chapters)) {
       errors.chapters = 'Number of chapters is required';
-    } else if (data.chapters < 1 || data.chapters > 20) {
-      errors.chapters = 'Number of chapters must be between 1 and 20';
+    } else if (data.chapters < 1 || data.chapters > 7) {
+      errors.chapters = 'Number of chapters must be between 1 and 7';
     }
   }
 
