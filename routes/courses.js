@@ -14,9 +14,10 @@ import { protect } from '../middleware/auth.js';
 const router = express.Router();
 
 router.get('/explore', getAllCourses);
+router.get('/preview/:id', getCourseById); // Public route for course preview
 router.post('/generate', generateCourse);
-router.post('/generate-full', protect, generateAndSaveFullCourse);
 
+router.post('/generate-full', protect, generateAndSaveFullCourse);
 router.use(protect);
 
 router.post('/', createCourse);
