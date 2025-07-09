@@ -90,6 +90,23 @@ enrollmentSchema.methods.markTopicCompleted = function(chapterOrder, topicIndex)
   return this.save();
 };
 
+// Clean up duplicate completed topics
+enrollmentSchema.methods.cleanupCompletedTopics = function() {
+  const uniqueTopics = [];
+  const seen = new Set();
+  
+  this.progress.completedTopics.forEach(topic => {
+    const key = `${topic.chapterOrder}-${topic.topicIndex}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueTopics.push(topic);
+    }
+  });
+  
+  this.progress.completedTopics = uniqueTopics;
+  return this.save();
+};
+
 const Enrollment = mongoose.model('Enrollment', enrollmentSchema);
 
 export default Enrollment; 

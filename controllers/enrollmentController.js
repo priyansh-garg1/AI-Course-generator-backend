@@ -75,8 +75,9 @@ export const getUserEnrollments = async (req, res) => {
     const enrollmentsWithProgress = await Promise.all(
       enrollments.map(async (enrollment) => {
         const course = await Course.findById(enrollment.courseId._id);
+        // Each generatedChapter is actually a topic, so we count them directly
         const totalTopics = course?.generatedChapters?.length || 0;
-        const completedTopics = enrollment.progress.completedTopics.length;
+        const completedTopics = Math.min(enrollment.progress.completedTopics.length, totalTopics);
         const completionPercentage = totalTopics > 0 ? Math.min(Math.round((completedTopics / totalTopics) * 100), 100) : 0;
 
         return {
@@ -84,6 +85,7 @@ export const getUserEnrollments = async (req, res) => {
           progress: {
             ...enrollment.progress,
             totalTopics,
+            completedTopics,
             completionPercentage
           }
         };
@@ -138,8 +140,9 @@ export const getEnrollmentDetails = async (req, res) => {
     }
 
     // Calculate total topics and completion percentage
+    // Each generatedChapter is actually a topic, so we count them directly
     const totalTopics = course.generatedChapters?.length || 0;
-    const completedTopics = enrollment.progress.completedTopics.length;
+    const completedTopics = Math.min(enrollment.progress.completedTopics.length, totalTopics);
     const completionPercentage = totalTopics > 0 ? Math.min(Math.round((completedTopics / totalTopics) * 100), 100) : 0;
 
     res.json({
@@ -184,9 +187,10 @@ export const markTopicCompleted = async (req, res) => {
 
     // Get updated progress
     const course = await Course.findById(courseId);
+    // Each generatedChapter is actually a topic, so we count them directly
     const totalTopics = course.generatedChapters?.length || 0;
-    const completedTopics = enrollment.progress.completedTopics.length;
-    const completionPercentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+    const completedTopics = Math.min(enrollment.progress.completedTopics.length, totalTopics);
+    const completionPercentage = totalTopics > 0 ? Math.min(Math.round((completedTopics / totalTopics) * 100), 100) : 0;
 
     res.json({
       success: true,
