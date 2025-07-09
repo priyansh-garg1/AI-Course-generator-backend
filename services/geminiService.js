@@ -66,7 +66,7 @@ Please generate a comprehensive course layout based on the user input. Make sure
 
 export const generateFullCourseContent = async (courseLayout) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Generate detailed HTML-based educational content for each topic under every chapter from the provided course layout.
 
